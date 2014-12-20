@@ -7,6 +7,7 @@ require 'byebug'
   @set[3] = [72, 48, 36, 24, 18]
   @set[4] = [72, 48, 36, 24, 18]
   @set[5] = [66, 44, 33, 22, 16]
+  @set[6] = [162, 108, 80, 54, 40]
   @default_set = @set[2]
 def check_if_valid_image_path?(image_path)
   puts "imagepath: #{image_path}"
@@ -34,6 +35,7 @@ def print_help(help_arg)
     puts "  3: actionbar, tab icon 2 [72, 48, 36, 24, 18]"
     puts "  4: notification icon 1 [72, 48, 36, 24, 18]"
     puts "  5: notification icon 2 [66, 44, 33, 22, 16]"
+    puts "  6: custom size [162, 108, 80, 54, 40]"
   else
     # general help
     puts "General Usage: "
