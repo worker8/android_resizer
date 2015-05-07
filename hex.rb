@@ -43,7 +43,7 @@ def print_help(help_arg)
     puts "  ruby hex.rb -help or -h: printing this help instruction"
     puts "  ruby hex.rb <source> -set a: type 'ruby hex.rb -help set' for more info"
     puts "  ruby hex.rb -calculate 123 <---- 123 should be the xxhdpi size, it will return you the rest of the sizes for xhdpi, hdpi, mdpi, ldpi"
-    puts "  TODO: ruby hex.rb <source> -size [144, 96, 72, 48, 36]"
+    puts "  ruby hex.rb <source> -resize "
   end
 end
 
@@ -83,6 +83,27 @@ def convert_image(set_group)
   end
 end
 
+def resize_by_percentage
+  path = @image_path.split '/'
+  @image_name = path.last
+  path = path.take(path.size - 2)
+  path = path.join '/'
+
+  # construct commands
+  convert_commands = []
+  convert_commands.push "convert #{@image_path} -resize  #{Calculator.dpi_divider_percentage_hash[:xhdpi]} #{path}/drawable-xhdpi/#{@image_name}"
+  convert_commands.push "convert #{@image_path} -resize  #{Calculator.dpi_divider_percentage_hash[:hdpi]} #{path}/drawable-hdpi/#{@image_name}"
+  convert_commands.push "convert #{@image_path} -resize  #{Calculator.dpi_divider_percentage_hash[:mdpi]} #{path}/drawable-mdpi/#{@image_name}"
+  convert_commands.push "convert #{@image_path} -resize  #{Calculator.dpi_divider_percentage_hash[:ldpi]} #{path}/drawable-ldpi/#{@image_name}"
+
+  # run commands
+  convert_commands.each { |command|
+    puts "#{command}"
+    system(command)
+  }
+  #end
+end
+
 def get_set_group(set_arg)
   if set_arg.nil? || set_arg.to_i >= @set.length || set_arg.to_i < 0
     #puts "Invalid set argument, type 'ruby hex.rb -help set' to learn more about the usage"
@@ -95,6 +116,12 @@ end
 
 class Calculator
   @@dpi_divider_hash = {:xxhdpi => 1, :xhdpi => 1.5, :hdpi => 2.0, :mdpi => 3.0, :ldpi => 4.0}
+  @dpi_divider_percentage_hash = {:xxhdpi => "100%", :xhdpi => "67%", :hdpi => "50%", :mdpi => "33%", :ldpi => "25%"}
+
+  class << self
+    attr_accessor :dpi_divider_percentage_hash
+  end
+
   def self.calculate(x)
     temp_array = []
     @@dpi_divider_hash.each { |key,value|
@@ -103,6 +130,7 @@ class Calculator
     return temp_array
   end
 end
+
 ####### program starts here ##########
 # parse arguments
 ARGV.each_with_index do|item, index|
@@ -116,10 +144,12 @@ ARGV.each_with_index do|item, index|
     elsif item == "-calculate"
       @calculate_flag = true
       @calculate_arg = ARGV[index+1]
+    elsif item == "-resize"
+      @resize_flag = true
+      @resize_arg = ARGV[index+1]
     end
   end
 end
-
 # First check if image path is valid
 @image_path = ARGV[0].dup
 
@@ -135,6 +165,8 @@ elsif @set_flag
   end
 elsif @calculate_flag
   print "#{Calculator.calculate @calculate_arg}"
+elsif @resize_flag
+  resize_by_percentage
 else
   print_help(@help_arg)
 end
