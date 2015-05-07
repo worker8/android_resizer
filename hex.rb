@@ -8,6 +8,7 @@ require 'byebug'
   @set[4] = [72, 48, 36, 24, 18]
   @set[5] = [66, 44, 33, 22, 16]
   @set[6] = [162, 108, 80, 54, 40]
+  @set[7] = [282, 188.0, 141.0, 94.0, 70.5]
   @default_set = @set[2]
 def check_if_valid_image_path?(image_path)
   puts "imagepath: #{image_path}"
@@ -41,7 +42,8 @@ def print_help(help_arg)
     puts "General Usage: "
     puts "  ruby hex.rb -help or -h: printing this help instruction"
     puts "  ruby hex.rb <source> -set a: type 'ruby hex.rb -help set' for more info"
-    puts "  ruby hex.rb <source> -size [144, 96, 72, 48, 36]"
+    puts "  ruby hex.rb -calculate 123 <---- 123 should be the xxhdpi size, it will return you the rest of the sizes for xhdpi, hdpi, mdpi, ldpi"
+    puts "  TODO: ruby hex.rb <source> -size [144, 96, 72, 48, 36]"
   end
 end
 
@@ -91,6 +93,17 @@ def get_set_group(set_arg)
   end
 end
 
+class Calculator
+  @@dpi_divider_hash = {:xxhdpi => 1, :xhdpi => 1.5, :hdpi => 2.0, :mdpi => 3.0, :ldpi => 4.0}
+  def self.calculate(x)
+    temp_array = []
+    @@dpi_divider_hash.each { |key,value|
+      temp_array.push (x.to_i/value).round(1)
+    }
+    return temp_array
+  end
+end
+####### program starts here ##########
 # parse arguments
 ARGV.each_with_index do|item, index|
   if item == "-h" || item == "-help"
@@ -98,7 +111,11 @@ ARGV.each_with_index do|item, index|
     @help_arg = ARGV[index+1]
   else
     if item == "-set"
+      @set_flag = true
       @set_arg = ARGV[index+1]
+    elsif item == "-calculate"
+      @calculate_flag = true
+      @calculate_arg = ARGV[index+1]
     end
   end
 end
@@ -106,10 +123,9 @@ end
 # First check if image path is valid
 @image_path = ARGV[0].dup
 
-
 if @help_flag
   print_help(@help_arg)
-else
+elsif @set_flag
   is_image_path_valid = check_if_valid_image_path? @image_path
   if is_image_path_valid
     @image_name = @image_path.split("/").last
@@ -117,6 +133,10 @@ else
   else
     print "Invalid image path, use -help to get usage instruction"
   end
+elsif @calculate_flag
+  print "#{Calculator.calculate @calculate_arg}"
+else
+  print_help(@help_arg)
 end
 #if item == "-h" || item == "-help"
 
